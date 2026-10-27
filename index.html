@@ -262,7 +262,7 @@ $('#ul').onclick=()=>{LG({tahap:'Memilih mata uji'});S.mp=null;S.ok=0;S.fin=0;S.
 /* ================= DATABASE ================= */
 const DB={
  cfg(){return(CLOUD_URL||'').trim().replace(/\/+$/,'')},
- async req(path,method='GET',body){const r=await fetch(this.cfg()+'/'+path+'.json',{method,headers:body!==undefined?{'Content-Type':'application/json'}:undefined,body:body!==undefined?JSON.stringify(body):undefined});if(!r.ok)throw new Error('Database '+r.status);return r.json()},
+ async req(path,method='GET',body){const ac=typeof AbortController!='undefined'?new AbortController():null,tm=ac?setTimeout(()=>ac.abort(),12000):0;try{const r=await fetch(this.cfg()+'/'+path+'.json',{method,signal:ac?ac.signal:undefined,headers:body!==undefined?{'Content-Type':'application/json'}:undefined,body:body!==undefined?JSON.stringify(body):undefined});if(!r.ok)throw new Error('Database '+r.status);return await r.json()}finally{clearTimeout(tm)}},
  loc(){try{return JSON.parse(localStorage.getItem('tkaDB')||'{}')}catch(e){return{}}},
  mut(f){const o=this.loc();o.peserta=o.peserta||{};f(o);localStorage.setItem('tkaDB',JSON.stringify(o))},
  async all(){return this.cfg()?(await this.req('peserta'))||{}:this.loc().peserta||{}},
